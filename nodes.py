@@ -11,7 +11,7 @@ def get_content_for_indices(files_data, indices):
     for i in indices:
         if 0 <= i < len(files_data):
             path, content = files_data[i]
-            content_map[f"{i} # {path}"] = content # Use index + path as key for context
+            content_map[f"{i} # {path}"] = content
     return content_map
 
 class FetchRepo(Node):
@@ -72,32 +72,32 @@ class FetchRepo(Node):
         return files_list
 
     def post(self, shared, prep_res, exec_res):
-        shared["files"] = exec_res # List of (path, content) tuples
+        shared["files"] = exec_res
 
 class IdentifyAbstractions(Node):
     def prep(self, shared):
         files_data = shared["files"]
-        project_name = shared["project_name"]  # Get project name
-        language = shared.get("language", "english") # Get language
+        project_name = shared["project_name"]
+        language = shared.get("language", "english")
 
         # Helper to create context from files, respecting limits (basic example)
         def create_llm_context(files_data):
             context = ""
-            file_info = [] # Store tuples of (index, path)
+            file_info = []
             for i, (path, content) in enumerate(files_data):
                 entry = f"--- File Index {i}: {path} ---\n{content}\n\n"
                 context += entry
                 file_info.append((i, path))
 
-            return context, file_info # file_info is list of (index, path)
+            return context, file_info
 
         context, file_info = create_llm_context(files_data)
         # Format file info for the prompt (comment is just a hint for LLM)
         file_listing_for_prompt = "\n".join([f"- {idx} # {path}" for idx, path in file_info])
-        return context, file_listing_for_prompt, len(files_data), project_name, language # Return language
+        return context, file_listing_for_prompt, len(files_data), project_name, language
 
     def exec(self, prep_res):
-        context, file_listing_for_prompt, file_count, project_name, language = prep_res  # Unpack project name and language
+        context, file_listing_for_prompt, file_count, project_name, language = prep_res
         print(f"Identifying abstractions using LLM...")
 
         # Add language instruction and hints only if not English
@@ -186,8 +186,8 @@ Format the output as a YAML list of dictionaries:
             item["files"] = sorted(list(set(validated_indices)))
             # Store only the required fields
             validated_abstractions.append({
-                "name": item["name"], # Potentially translated name
-                "description": item["description"], # Potentially translated description
+                "name": item["name"],
+                "description": item["description"],
                 "files": item["files"]
             })
 
@@ -195,14 +195,14 @@ Format the output as a YAML list of dictionaries:
         return validated_abstractions
 
     def post(self, shared, prep_res, exec_res):
-        shared["abstractions"] = exec_res # List of {"name": str, "description": str, "files": [int]}
+        shared["abstractions"] = exec_res
 
 class AnalyzeRelationships(Node):
     def prep(self, shared):
-        abstractions = shared["abstractions"] # Now contains 'files' list of indices, name/description potentially translated
+        abstractions = shared["abstractions"]
         files_data = shared["files"]
-        project_name = shared["project_name"]  # Get project name
-        language = shared.get("language", "english") # Get language
+        project_name = shared["project_name"]
+        language = shared.get("language", "english")
 
         # Create context with abstraction names, indices, descriptions, and relevant file snippets
         context = "Identified Abstractions:\n"
@@ -214,7 +214,7 @@ class AnalyzeRelationships(Node):
             # Abstraction name and description might be translated already
             info_line = f"- Index {i}: {abstr['name']} (Relevant file indices: [{file_indices_str}])\n  Description: {abstr['description']}"
             context += info_line + "\n"
-            abstraction_info_for_prompt.append(f"{i} # {abstr['name']}") # Use potentially translated name here too
+            abstraction_info_for_prompt.append(f"{i} # {abstr['name']}")
             all_relevant_indices.update(abstr['files'])
 
         context += "\nRelevant File Snippets (Referenced by Index and Path):\n"
@@ -230,10 +230,10 @@ class AnalyzeRelationships(Node):
         )
         context += file_context_str
 
-        return context, "\n".join(abstraction_info_for_prompt), project_name, language # Return language
+        return context, "\n".join(abstraction_info_for_prompt), project_name, language
 
     def exec(self, prep_res):
-        context, abstraction_listing, project_name, language = prep_res  # Unpack project name and language
+        context, abstraction_listing, project_name, language = prep_res
         print(f"Analyzing relationships using LLM...")
 
         # Add language instruction and hints only if not English
@@ -243,7 +243,7 @@ class AnalyzeRelationships(Node):
         if language.lower() != "english":
             language_instruction = f"IMPORTANT: Generate the `summary` and relationship `label` fields in **{language.capitalize()}** language. Do NOT use English for these fields.\n\n"
             lang_hint = f" (in {language.capitalize()})"
-            list_lang_note = f" (Names might be in {language.capitalize()})" # Note for the input list
+            list_lang_note = f" (Names might be in {language.capitalize()})"
 
         prompt = f"""
 Based on the following abstractions and relevant code snippets from the project `{project_name}`:
@@ -316,34 +316,31 @@ Now, provide the YAML output:
                  validated_relationships.append({
                      "from": from_idx,
                      "to": to_idx,
-                     "label": rel["label"] # Potentially translated label
+                     "label": rel["label"]
                  })
              except (ValueError, TypeError):
                   raise ValueError(f"Could not parse indices from relationship: {rel}")
 
         print("Generated project summary and relationship details.")
         return {
-            "summary": relationships_data["summary"], # Potentially translated summary
-            "details": validated_relationships # Store validated, index-based relationships with potentially translated labels
+            "summary": relationships_data["summary"],
+            "details": validated_relationships
         }
 
-
     def post(self, shared, prep_res, exec_res):
-        # Structure is now {"summary": str, "details": [{"from": int, "to": int, "label": str}]}
-        # Summary and label might be translated
         shared["relationships"] = exec_res
 
 class OrderChapters(Node):
     def prep(self, shared):
-        abstractions = shared["abstractions"] # Name/description might be translated
-        relationships = shared["relationships"] # Summary/label might be translated
-        project_name = shared["project_name"]  # Get project name
-        language = shared.get("language", "english") # Get language
+        abstractions = shared["abstractions"]
+        relationships = shared["relationships"]
+        project_name = shared["project_name"]
+        language = shared.get("language", "english")
 
         # Prepare context for the LLM
         abstraction_info_for_prompt = []
         for i, a in enumerate(abstractions):
-            abstraction_info_for_prompt.append(f"- {i} # {a['name']}") # Use potentially translated name
+            abstraction_info_for_prompt.append(f"- {i} # {a['name']}")
         abstraction_listing = "\n".join(abstraction_info_for_prompt)
 
         # Use potentially translated summary and labels
@@ -357,7 +354,7 @@ class OrderChapters(Node):
              from_name = abstractions[rel['from']]['name']
              to_name = abstractions[rel['to']]['name']
              # Use potentially translated 'label'
-             context += f"- From {rel['from']} ({from_name}) to {rel['to']} ({to_name}): {rel['label']}\n" # Label might be translated
+             context += f"- From {rel['from']} ({from_name}) to {rel['to']} ({to_name}): {rel['label']}\n"
 
         list_lang_note = ""
         if language.lower() != "english":
@@ -428,31 +425,30 @@ Now, provide the YAML output:
              raise ValueError(f"Ordered list length ({len(ordered_indices)}) does not match number of abstractions ({num_abstractions}). Missing indices: {set(range(num_abstractions)) - seen_indices}")
 
         print(f"Determined chapter order (indices): {ordered_indices}")
-        return ordered_indices # Return the list of indices
+        return ordered_indices
 
     def post(self, shared, prep_res, exec_res):
-        # exec_res is already the list of ordered indices
-        shared["chapter_order"] = exec_res # List of indices
+        shared["chapter_order"] = exec_res
 
 class WriteChapters(BatchNode):
     def prep(self, shared):
-        chapter_order = shared["chapter_order"] # List of indices
-        abstractions = shared["abstractions"]   # List of dicts, name/desc potentially translated
+        chapter_order = shared["chapter_order"]
+        abstractions = shared["abstractions"]
         files_data = shared["files"]
-        language = shared.get("language", "english") # Get language
+        language = shared.get("language", "english")
 
         # Get already written chapters to provide context
         # We store them temporarily during the batch run, not in shared memory yet
         # The 'previous_chapters_summary' will be built progressively in the exec context
-        self.chapters_written_so_far = [] # Use instance variable for temporary storage across exec calls
+        self.chapters_written_so_far = []
 
         # Create a complete list of all chapters
         all_chapters = []
-        chapter_filenames = {} # Store chapter filename mapping for linking
+        chapter_filenames = {}
         for i, abstraction_index in enumerate(chapter_order):
             if 0 <= abstraction_index < len(abstractions):
                 chapter_num = i + 1
-                chapter_name = abstractions[abstraction_index]["name"] # Potentially translated name
+                chapter_name = abstractions[abstraction_index]["name"]
                 # Create safe filename (from potentially translated name)
                 safe_name = "".join(c if c.isalnum() else '_' for c in chapter_name).lower()
                 filename = f"{i+1:02d}_{safe_name}.md"
@@ -467,7 +463,7 @@ class WriteChapters(BatchNode):
         items_to_process = []
         for i, abstraction_index in enumerate(chapter_order):
             if 0 <= abstraction_index < len(abstractions):
-                abstraction_details = abstractions[abstraction_index] # Contains potentially translated name/desc
+                abstraction_details = abstractions[abstraction_index]
                 # Use 'files' (list of indices) directly
                 related_file_indices = abstraction_details.get("files", [])
                 # Get content using helper, passing indices
@@ -488,26 +484,24 @@ class WriteChapters(BatchNode):
                 items_to_process.append({
                     "chapter_num": i + 1,
                     "abstraction_index": abstraction_index,
-                    "abstraction_details": abstraction_details, # Has potentially translated name/desc
+                    "abstraction_details": abstraction_details,
                     "related_files_content_map": related_files_content_map,
-                    "project_name": shared["project_name"],  # Add project name
-                    "full_chapter_listing": full_chapter_listing,  # Add the full chapter listing (uses potentially translated names)
-                    "chapter_filenames": chapter_filenames,  # Add chapter filenames mapping (uses potentially translated names)
-                    "prev_chapter": prev_chapter,  # Add previous chapter info (uses potentially translated name)
-                    "next_chapter": next_chapter,  # Add next chapter info (uses potentially translated name)
-                    "language": language,  # Add language for multi-language support
-                    # previous_chapters_summary will be added dynamically in exec
+                    "project_name": shared["project_name"],
+                    "full_chapter_listing": full_chapter_listing,
+                    "chapter_filenames": chapter_filenames,
+                    "prev_chapter": prev_chapter,
+                    "next_chapter": next_chapter,
+                    "language": language,
                 })
             else:
                 print(f"Warning: Invalid abstraction index {abstraction_index} in chapter_order. Skipping.")
 
         print(f"Preparing to write {len(items_to_process)} chapters...")
-        return items_to_process # Iterable for BatchNode
+        return items_to_process
 
     def exec(self, item):
-        # This runs for each item prepared above
-        abstraction_name = item["abstraction_details"]["name"] # Potentially translated name
-        abstraction_description = item["abstraction_details"]["description"] # Potentially translated description
+        abstraction_name = item["abstraction_details"]["name"]
+        abstraction_description = item["abstraction_details"]["description"]
         chapter_num = item["chapter_num"]
         project_name = item.get("project_name")
         language = item.get("language", "english")
@@ -544,7 +538,6 @@ class WriteChapters(BatchNode):
             code_comment_note = f" (Translate to {lang_cap} if possible, otherwise keep minimal English for clarity)"
             link_lang_note = f" (Use the {lang_cap} chapter title from the structure above)"
             tone_note = f" (appropriate for {lang_cap} readers)"
-
 
         prompt = f"""
 {language_instruction}Write a very beginner-friendly tutorial chapter (in Markdown format) for the project `{project_name}` about the concept: "{abstraction_name}". This is Chapter {chapter_num}.
@@ -596,23 +589,22 @@ Now, directly provide a super beginner-friendly Markdown output (DON'T need ```m
 """
         chapter_content = call_llm(prompt)
         # Basic validation/cleanup
-        actual_heading = f"# Chapter {chapter_num}: {abstraction_name}" # Use potentially translated name
+        actual_heading = f"# Chapter {chapter_num}: {abstraction_name}"
         if not chapter_content.strip().startswith(f"# Chapter {chapter_num}"):
              # Add heading if missing or incorrect, trying to preserve content
              lines = chapter_content.strip().split('\n')
-             if lines and lines[0].strip().startswith("#"): # If there's some heading, replace it
+             if lines and lines[0].strip().startswith("#"):
                  lines[0] = actual_heading
                  chapter_content = "\n".join(lines)
-             else: # Otherwise, prepend it
+             else:
                  chapter_content = f"{actual_heading}\n\n{chapter_content}"
 
         # Add the generated content to our temporary list for the next iteration's context
         self.chapters_written_so_far.append(chapter_content)
 
-        return chapter_content # Return the Markdown string (potentially translated)
+        return chapter_content
 
     def post(self, shared, prep_res, exec_res_list):
-        # exec_res_list contains the generated Markdown for each chapter, in order
         shared["chapters"] = exec_res_list
         # Clean up the temporary instance variable
         del self.chapters_written_so_far
@@ -621,16 +613,15 @@ Now, directly provide a super beginner-friendly Markdown output (DON'T need ```m
 class CombineTutorial(Node):
     def prep(self, shared):
         project_name = shared["project_name"]
-        output_base_dir = shared.get("output_dir", "output") # Default output dir
+        output_base_dir = shared.get("output_dir", "output")
         output_path = os.path.join(output_base_dir, project_name)
-        repo_url = shared.get("repo_url")  # Get the repository URL
-        # language = shared.get("language", "english") # No longer needed for fixed strings
+        repo_url = shared.get("repo_url")
 
         # Get potentially translated data
-        relationships_data = shared["relationships"] # {"summary": str, "details": [{"from": int, "to": int, "label": str}]} -> summary/label potentially translated
-        chapter_order = shared["chapter_order"] # indices
-        abstractions = shared["abstractions"]   # list of dicts -> name/description potentially translated
-        chapters_content = shared["chapters"]   # list of strings -> content potentially translated
+        relationships_data = shared["relationships"]
+        chapter_order = shared["chapter_order"]
+        abstractions = shared["abstractions"]
+        chapters_content = shared["chapters"]
 
         # --- Generate Mermaid Diagram ---
         mermaid_lines = ["flowchart TD"]
@@ -639,25 +630,25 @@ class CombineTutorial(Node):
             node_id = f"A{i}"
             # Use potentially translated name, sanitize for Mermaid ID and label
             sanitized_name = abstr['name'].replace('"', '')
-            node_label = sanitized_name # Using sanitized name only
-            mermaid_lines.append(f'    {node_id}["{node_label}"]') # Node label uses potentially translated name
+            node_label = sanitized_name
+            mermaid_lines.append(f'    {node_id}["{node_label}"]')
         # Add edges for relationships using potentially translated labels
         for rel in relationships_data['details']:
             from_node_id = f"A{rel['from']}"
             to_node_id = f"A{rel['to']}"
             # Use potentially translated label, sanitize
-            edge_label = rel['label'].replace('"', '').replace('\n', ' ') # Basic sanitization
+            edge_label = rel['label'].replace('"', '').replace('\n', ' ')
             max_label_len = 30
             if len(edge_label) > max_label_len:
                 edge_label = edge_label[:max_label_len-3] + "..."
-            mermaid_lines.append(f'    {from_node_id} -- "{edge_label}" --> {to_node_id}') # Edge label uses potentially translated label
+            mermaid_lines.append(f'    {from_node_id} -- "{edge_label}" --> {to_node_id}')
 
         mermaid_diagram = "\n".join(mermaid_lines)
         # --- End Mermaid ---
 
         # --- Prepare index.md content ---
         index_content = f"# Tutorial: {project_name}\n\n"
-        index_content += f"{relationships_data['summary']}\n\n" # Use the potentially translated summary directly
+        index_content += f"{relationships_data['summary']}\n\n"
         # Keep fixed strings in English
         index_content += f"**Source Repository:** [{repo_url}]({repo_url})\n\n"
 
@@ -674,14 +665,14 @@ class CombineTutorial(Node):
         for i, abstraction_index in enumerate(chapter_order):
             # Ensure index is valid and we have content for it
             if 0 <= abstraction_index < len(abstractions) and i < len(chapters_content):
-                abstraction_name = abstractions[abstraction_index]["name"] # Potentially translated name
+                abstraction_name = abstractions[abstraction_index]["name"]
                 # Sanitize potentially translated name for filename
                 safe_name = "".join(c if c.isalnum() else '_' for c in abstraction_name).lower()
                 filename = f"{i+1:02d}_{safe_name}.md"
-                index_content += f"{i+1}. [{abstraction_name}]({filename})\n" # Use potentially translated name in link text
+                index_content += f"{i+1}. [{abstraction_name}]({filename})\n"
 
                 # Add attribution to chapter content (using English fixed string)
-                chapter_content = chapters_content[i] # Potentially translated content
+                chapter_content = chapters_content[i]
                 if not chapter_content.endswith("\n\n"):
                     chapter_content += "\n\n"
                 # Keep fixed strings in English
@@ -698,7 +689,7 @@ class CombineTutorial(Node):
         return {
             "output_path": output_path,
             "index_content": index_content,
-            "chapter_files": chapter_files # List of {"filename": str, "content": str}
+            "chapter_files": chapter_files
         }
 
     def exec(self, prep_res):
@@ -723,9 +714,8 @@ class CombineTutorial(Node):
                 f.write(chapter_info["content"])
             print(f"  - Wrote {chapter_filepath}")
 
-        return output_path # Return the final path
-
+        return output_path
 
     def post(self, shared, prep_res, exec_res):
-        shared["final_output_dir"] = exec_res # Store the output path
+        shared["final_output_dir"] = exec_res
         print(f"\nTutorial generation complete! Files are in: {exec_res}")

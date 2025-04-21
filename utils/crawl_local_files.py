@@ -24,13 +24,11 @@ def crawl_local_files(directory, include_patterns=None, exclude_patterns=None, m
         for filename in files:
             filepath = os.path.join(root, filename)
             
-            # Get path relative to directory if requested
             if use_relative_paths:
                 relpath = os.path.relpath(filepath, directory)
             else:
                 relpath = filepath
                 
-            # Check if file matches any include pattern
             included = False
             if include_patterns:
                 for pattern in include_patterns:

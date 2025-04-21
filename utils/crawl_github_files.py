@@ -44,26 +44,20 @@ def crawl_github_files(
 
     def should_include_file(file_path: str, file_name: str) -> bool:
         """Determine if a file should be included based on patterns"""
-        # If no include patterns are specified, include all files
         if not include_patterns:
             include_file = True
         else:
-            # Check if file matches any include pattern
             include_file = any(fnmatch.fnmatch(file_name, pattern) for pattern in include_patterns)
 
-        # If exclude patterns are specified, check if file should be excluded
         if exclude_patterns and include_file:
-            # Exclude if file matches any exclude pattern
             exclude_file = any(fnmatch.fnmatch(file_path, pattern) for pattern in exclude_patterns)
             return not exclude_file
 
         return include_file
 
-    # Detect SSH URL (git@ or .git suffix)
     is_ssh_url = repo_url.startswith("git@") or repo_url.endswith(".git")
 
     if is_ssh_url:
-        # Clone repo via SSH to temp dir
         with tempfile.TemporaryDirectory() as tmpdirname:
             print(f"Cloning SSH repo {repo_url} to temp dir {tmpdirname} ...")
             try:
@@ -124,14 +118,12 @@ def crawl_github_files(
                 }
             }
 
-    # Parse GitHub URL to extract owner, repo, commit/branch, and path
     parsed_url = urlparse(repo_url)
     path_parts = parsed_url.path.strip('/').split('/')
     
     if len(path_parts) < 2:
         raise ValueError(f"Invalid GitHub URL: {repo_url}")
     
-    # Extract the basic components
     owner = path_parts[0]
     repo = path_parts[1]
     
@@ -143,15 +135,13 @@ def crawl_github_files(
         path_start = tree_index + 2
         specific_path = '/'.join(path_parts[path_start:]) if path_start < len(path_parts) else ""
     else:
-        ref = "main"  # Default branch
+        ref = "main"
         specific_path = ""
     
-    # Setup for GitHub API
     headers = {"Accept": "application/vnd.github.v3+json"}
     if token:
         headers["Authorization"] = f"token {token}"
     
-    # Dictionary to store path -> content mapping
     files = {}
     skipped_files = []
     
@@ -208,7 +198,6 @@ def crawl_github_files(
         for item in contents:
             item_path = item["path"]
             
-            # Calculate relative path if requested
             if use_relative_paths and specific_path:
                 # Make sure the path is relative to the specified subdirectory
                 if item_path.startswith(specific_path):
@@ -224,14 +213,12 @@ def crawl_github_files(
                     print(f"Skipping {rel_path}: Does not match include/exclude patterns")
                     continue
                 
-                # Check file size if available
                 file_size = item.get("size", 0)
                 if file_size > max_file_size:
                     skipped_files.append((item_path, file_size))
                     print(f"Skipping {rel_path}: File size ({file_size} bytes) exceeds limit ({max_file_size} bytes)")
                     continue
                 
-                # For files, get raw content
                 if "download_url" in item and item["download_url"]:
                     file_url = item["download_url"]
                     file_response = requests.get(file_url, headers=headers)
@@ -249,13 +236,11 @@ def crawl_github_files(
                     else:
                         print(f"Failed to download {rel_path}: {file_response.status_code}")
                 else:
-                    # Alternative method if download_url is not available
                     content_response = requests.get(item["url"], headers=headers)
                     if content_response.status_code == 200:
                         content_data = content_response.json()
                         if content_data.get("encoding") == "base64" and "content" in content_data:
-                            # Check size of base64 content before decoding
-                            if len(content_data["content"]) * 0.75 > max_file_size:  # Approximate size calculation
+                            if len(content_data["content"]) * 0.75 > max_file_size:
                                 estimated_size = int(len(content_data["content"]) * 0.75)
                                 skipped_files.append((item_path, estimated_size))
                                 print(f"Skipping {rel_path}: Encoded content exceeds size limit")
@@ -290,7 +275,6 @@ def crawl_github_files(
 
 # Example usage
 if __name__ == "__main__":
-    # Get token from environment variable (recommended for private repos)
     github_token = os.environ.get("GITHUB_TOKEN")
     if not github_token:
         print("Warning: No GitHub token found in environment variable 'GITHUB_TOKEN'.\n"
@@ -304,8 +288,8 @@ if __name__ == "__main__":
         repo_url, 
         token=github_token,
         max_file_size=1 * 1024 * 1024,  # 1 MB in bytes
-        use_relative_paths=True,  # Enable relative paths
-        include_patterns={"*.py", "*.md"},  # Include Python and Markdown files
+        use_relative_paths=True,
+        include_patterns={"*.py", "*.md"},
     )
     
     files = result["files"]

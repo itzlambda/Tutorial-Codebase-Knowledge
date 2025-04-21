@@ -54,7 +54,6 @@ def main():
         "github_token": github_token,
         "output_dir": args.output, # Base directory for CombineTutorial output
 
-        # Add include/exclude patterns and max file size
         "include_patterns": set(args.include) if args.include else DEFAULT_INCLUDE_PATTERNS,
         "exclude_patterns": set(args.exclude) if args.exclude else DEFAULT_EXCLUDE_PATTERNS,
         "max_file_size": args.max_size,
@@ -71,13 +70,9 @@ def main():
         "final_output_dir": None
     }
 
-    # Display starting message with repository/directory and language
     print(f"Starting tutorial generation for: {args.repo or args.dir} in {args.language.capitalize()} language")
 
-    # Create the flow instance
     tutorial_flow = create_tutorial_flow()
-
-    # Run the flow
     tutorial_flow.run(shared)
 
 if __name__ == "__main__":

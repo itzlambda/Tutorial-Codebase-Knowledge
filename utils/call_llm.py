@@ -14,7 +14,7 @@ log_file = os.path.join(log_directory, f"llm_calls_{datetime.now().strftime('%Y%
 # Set up logger
 logger = logging.getLogger("llm_logger")
 logger.setLevel(logging.INFO)
-logger.propagate = False  # Prevent propagation to root logger
+logger.propagate = False
 file_handler = logging.FileHandler(log_file)
 file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 logger.addHandler(file_handler)
@@ -43,7 +43,7 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
             logger.info(f"RESPONSE: {cache[prompt]}")
             return cache[prompt]
     
-    model = os.getenv("GEMINI_MODEL", "gemini/gemini-2.5-pro-exp-03-25") # Keep using GEMINI_MODEL for now
+    model = os.getenv("GEMINI_MODEL", "gemini/gemini-2.5-pro-exp-03-25")
     litellm_model_name = f"{model}"
     
     try:
@@ -52,19 +52,14 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
             model=litellm_model_name,
             messages=[{"role": "user", "content": prompt}]
         )
-        # Extract the response text from the structured response
         response_text = response.choices[0].message.content
     except Exception as e:
         logger.error(f"LiteLLM call failed: {e}")
-        # Reraise or return an error message
-        raise e # Or return "LLM call failed."
+        raise e
 
-    # Log the response
     logger.info(f"RESPONSE: {response_text}")
     
-    # Update cache if enabled
     if use_cache:
-        # Load cache again to avoid overwrites
         cache = {}
         if os.path.exists(cache_file):
             try:
@@ -73,7 +68,6 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
             except:
                 pass
         
-        # Add to cache and save
         cache[prompt] = response_text
         try:
             with open(cache_file, 'w') as f:
@@ -82,41 +76,6 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
             logger.error(f"Failed to save cache: {e}")
     
     return response_text
-
-# # Use Anthropic Claude 3.7 Sonnet Extended Thinking (Example with litellm)
-# def call_llm(prompt, use_cache: bool = True):
-#     model = "claude-3-7-sonnet-20250219"
-#     try:
-#         response = litellm.completion(
-#             model=model,
-#             messages=[{"role": "user", "content": prompt}],
-#             max_tokens=21000,
-#             # Litellm might pass additional parameters differently, check docs
-#             # For thinking parameters, you might need specific litellm config
-#         )
-#         response_text = response.choices[0].message.content
-#     except Exception as e:
-#         logger.error(f"LiteLLM call failed: {e}")
-#         raise e
-#     return response_text
-
-# # Use OpenAI o1 (Example with litellm)
-# def call_llm(prompt, use_cache: bool = True):
-#     model="o1"
-#     try:
-#         response = litellm.completion(
-#             model=model,
-#             messages=[{"role": "user", "content": prompt}],
-#             response_format={ # Check litellm docs for exact parameter names
-#                 "type": "text"
-#             },
-#             # Reasoning effort and store might be passed via metadata or specific keys
-#         )
-#         response_text = response.choices[0].message.content
-#     except Exception as e:
-#         logger.error(f"LiteLLM call failed: {e}")
-#         raise e
-#     return response_text
 
 if __name__ == "__main__":
     test_prompt = "Hello, how are you?"
