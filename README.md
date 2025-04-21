@@ -77,14 +77,34 @@ This is a tutorial project of [Pocket Flow](https://github.com/The-Pocket/Pocket
 3. Set up LLM in [`utils/call_llm.py`](./utils/call_llm.py) by providing credentials. By default, you can use the AI Studio key with this client for Gemini Pro 2.5:
 
    ```python
-   client = genai.Client(
-     api_key=os.getenv("GEMINI_API_KEY", "your-api_key"),
-   )
-   ```
+   # utils/call_llm.py - Using litellm
+   import litellm
+   import os
+   import logging
+   import json
 
-   You can use your own models. We highly recommend the latest models with thinking capabilities (Claude 3.7 with thinking, O1). You can verify that it is correctly set up by running:
-   ```bash
-   python utils/call_llm.py
+   # By default, we Google Gemini 2.5 pro, as it shows great performance for code understanding
+   def call_llm(prompt: str, use_cache: bool = True) -> str:
+       # ... (logging and caching logic) ...
+
+       # Call the LLM using litellm
+       model = os.getenv("GEMINI_MODEL", "gemini-2.5-pro-exp-03-25") # Example model
+       # For Vertex AI, ensure VERTEXAI_PROJECT and VERTEXAI_LOCATION env vars are set
+       # litellm_model_name = f"vertex_ai/{model}" # Use this if provider prefix is needed
+       litellm_model_name = model # Assuming prefix is not needed or handled by env vars
+       
+       try:
+           response = litellm.completion(
+               model=litellm_model_name,
+               messages=[{"role": "user", "content": prompt}]
+           )
+           response_text = response.choices[0].message.content
+       except Exception as e:
+           logger.error(f"LiteLLM call failed: {e}")
+           raise e # Or handle error appropriately
+       
+       # ... (logging and caching logic) ...
+       return response_text
    ```
 
 4. Generate a complete codebase tutorial by running the main script:

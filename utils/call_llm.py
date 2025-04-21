@@ -1,4 +1,4 @@
-from google import genai
+import litellm
 import os
 import logging
 import json
@@ -41,24 +41,22 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
             logger.info(f"RESPONSE: {cache[prompt]}")
             return cache[prompt]
     
-    # Call the LLM if not in cache or cache disabled
-    client = genai.Client(
-        vertexai=True, 
-        # TODO: change to your own project id and location
-        project=os.getenv("GEMINI_PROJECT_ID", "your-project-id"),
-        location=os.getenv("GEMINI_LOCATION", "us-central1")
-    )
-    # You can comment the previous line and use the AI Studio key instead:
-    # client = genai.Client(
-    #     api_key=os.getenv("GEMINI_API_KEY", "your-api_key"),
-    # )
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-pro-exp-03-25")
-    response = client.models.generate_content(
-        model=model,
-        contents=[prompt]
-    )
-    response_text = response.text
+    model = os.getenv("GEMINI_MODEL", "gemini/gemini-2.5-pro-exp-03-25") # Keep using GEMINI_MODEL for now
+    litellm_model_name = f"{model}"
     
+    try:
+        response = litellm.completion(
+            api_key=os.getenv("AI_API_KEY"),
+            model=litellm_model_name,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        # Extract the response text from the structured response
+        response_text = response.choices[0].message.content
+    except Exception as e:
+        logger.error(f"LiteLLM call failed: {e}")
+        # Reraise or return an error message
+        raise e # Or return "LLM call failed."
+
     # Log the response
     logger.info(f"RESPONSE: {response_text}")
     
@@ -83,37 +81,40 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
     
     return response_text
 
-# # Use Anthropic Claude 3.7 Sonnet Extended Thinking
+# # Use Anthropic Claude 3.7 Sonnet Extended Thinking (Example with litellm)
 # def call_llm(prompt, use_cache: bool = True):
-#     from anthropic import Anthropic
-#     client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", "your-api-key"))
-#     response = client.messages.create(
-#         model="claude-3-7-sonnet-20250219",
-#         max_tokens=21000,
-#         thinking={
-#             "type": "enabled",
-#             "budget_tokens": 20000
-#         },
-#         messages=[
-#             {"role": "user", "content": prompt}
-#         ]
-#     )
-#     return response.content[1].text
+#     model = "claude-3-7-sonnet-20250219"
+#     try:
+#         response = litellm.completion(
+#             model=model,
+#             messages=[{"role": "user", "content": prompt}],
+#             max_tokens=21000,
+#             # Litellm might pass additional parameters differently, check docs
+#             # For thinking parameters, you might need specific litellm config
+#         )
+#         response_text = response.choices[0].message.content
+#     except Exception as e:
+#         logger.error(f"LiteLLM call failed: {e}")
+#         raise e
+#     return response_text
 
-# # Use OpenAI o1
-# def call_llm(prompt, use_cache: bool = True):    
-#     from openai import OpenAI
-#     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", "your-api-key"))
-#     r = client.chat.completions.create(
-#         model="o1",
-#         messages=[{"role": "user", "content": prompt}],
-#         response_format={
-#             "type": "text"
-#         },
-#         reasoning_effort="medium",
-#         store=False
-#     )
-#     return r.choices[0].message.content
+# # Use OpenAI o1 (Example with litellm)
+# def call_llm(prompt, use_cache: bool = True):
+#     model="o1"
+#     try:
+#         response = litellm.completion(
+#             model=model,
+#             messages=[{"role": "user", "content": prompt}],
+#             response_format={ # Check litellm docs for exact parameter names
+#                 "type": "text"
+#             },
+#             # Reasoning effort and store might be passed via metadata or specific keys
+#         )
+#         response_text = response.choices[0].message.content
+#     except Exception as e:
+#         logger.error(f"LiteLLM call failed: {e}")
+#         raise e
+#     return response_text
 
 if __name__ == "__main__":
     test_prompt = "Hello, how are you?"
