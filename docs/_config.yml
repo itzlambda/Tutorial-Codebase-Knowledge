@@ -23,7 +23,7 @@ author:
 
 # Mermaid settings
 mermaid:
-  version: "9.1.3"  # Pick the version you want
+  version: "11.6.0"  # Pick the version you want
   # Default configuration
   config: |
     directionLR
