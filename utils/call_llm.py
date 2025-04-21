@@ -3,6 +3,8 @@ import os
 import logging
 import json
 from datetime import datetime
+import dotenv
+dotenv.load_dotenv()
 
 # Configure logging
 log_directory = os.getenv("LOG_DIR", "logs")
