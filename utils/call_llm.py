@@ -43,13 +43,13 @@ def call_llm(prompt: str, use_cache: bool = True) -> str:
             logger.info(f"RESPONSE: {cache[prompt]}")
             return cache[prompt]
     
-    model = os.getenv("GEMINI_MODEL", "gemini/gemini-2.5-pro-exp-03-25")
-    litellm_model_name = f"{model}"
-    
+    model = os.getenv("AI_MODEL")
+    api_key = os.getenv("AI_API_KEY")
+
     try:
         response = litellm.completion(
-            api_key=os.getenv("AI_API_KEY"),
-            model=litellm_model_name,
+            api_key=api_key,
+            model=model,
             messages=[{"role": "user", "content": prompt}]
         )
         response_text = response.choices[0].message.content
