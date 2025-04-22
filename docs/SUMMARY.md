@@ -11,3 +11,15 @@
   - [Frame & Call Handling](./Revm/08_frame___call_handling_.md)
   - [Handler & Execution Loop](./Revm/09_handler___execution_loop_.md)
   - [Inspector & Tracing](./Revm/10_inspector___tracing_.md)
+- [Snapchain](./Snapchain/index.md)
+  - [SnapchainNode and SnapchainReadNode](./Snapchain/01_snapchainnode_and_snapchainreadnode_.md)
+  - [Configuration and Startup Flow](./Snapchain/02_configuration_and_startup_flow_.md)
+  - [Network Layer: Gossip, Server, and RPC](./Snapchain/03_network_layer__gossip__server__and_rpc_.md)
+  - [Mempool and Rate Limits](./Snapchain/04_mempool_and_rate_limits_.md)
+  - [Consensus Actors (MalachiteConsensusActors, Host, ReadHost, Sync Actors)](./Snapchain/05_consensus_actors__malachiteconsensusactors__host__readhost__sync_actors__.md)
+  - [Core Protocol Types and Validation](./Snapchain/06_core_protocol_types_and_validation_.md)
+  - [Stores and Store Trait (e.g., CastStore, LinkStore, ReactionStore)](./Snapchain/07_stores_and_store_trait__e_g___caststore__linkstore__reactionstore__.md)
+  - [Storage Trie and RocksDB Abstractions](./Snapchain/08_storage_trie_and_rocksdb_abstractions_.md)
+  - [ShardEngine and BlockEngine (Storage Engines)](./Snapchain/09_shardengine_and_blockengine__storage_engines__.md)
+
+

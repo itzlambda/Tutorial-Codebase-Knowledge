@@ -101,3 +101,4 @@ llm_cache.json
 # Output files
 output/
 projects/
+book
