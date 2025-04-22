@@ -1,0 +1,12 @@
+[book]
+authors = ["itzlambda"]
+language = "en"
+multilingual = false
+src = "docs"
+title = "Tutorial Codebase Knowledge"
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output.html]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
