@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>MCP Python SDK - Tutorial Codebase Knowledge</title>
+        <title>Revm - Tutorial Codebase Knowledge</title>
 
 
         <!-- Custom HTML head -->
@@ -152,52 +152,66 @@
 
                 <div id="content" class="content">
                     <main>
-                        <hr />
-<h2>layout: default
-title: "MCP Python SDK"
-nav_order: 15
-has_children: true</h2>
-<h1 id="tutorial-mcp-python-sdk"><a class="header" href="#tutorial-mcp-python-sdk">Tutorial: MCP Python SDK</a></h1>
-<blockquote>
-<p>This tutorial is AI-generated! To learn more, check out <a href="https://github.com/The-Pocket/Tutorial-Codebase-Knowledge">AI Codebase Knowledge Builder</a></p>
-</blockquote>
-<p>The <strong>MCP Python SDK</strong><sup><a href="https://github.com/modelcontextprotocol/python-sdk/tree/d788424caa43599de38cee2f70233282d83e3a34/src/mcp">View Repo</a></sup> helps developers build applications (clients and servers) that talk to each other using the <em>Model Context Protocol (MCP)</em> specification.
-It simplifies communication by handling the low-level details like standard <strong>message formats</strong> (Abstraction 0), connection <strong>sessions</strong> (Abstraction 1), and different ways to send/receive data (<strong>transports</strong>, Abstraction 2).
-It also provides a high-level framework, <strong><code>FastMCP</code></strong> (Abstraction 3), making it easy to create servers that expose <strong>tools</strong> (Abstraction 5), <strong>resources</strong> (Abstraction 4), and <strong>prompts</strong> (Abstraction 6) to clients.
-The SDK includes <strong>command-line tools</strong> (Abstraction 8) for running and managing these servers.</p>
+                        <h1 id="tutorial-revm"><a class="header" href="#tutorial-revm">Tutorial: revm</a></h1>
+<p>This project implements a full Ethereum Virtual Machine (EVM) environment with <strong>modular abstractions</strong> for executing and managing <em>smart contract</em> code.<br />
+It includes an <strong>Interpreter</strong> that processes EVM bytecode step-by-step, a <strong>Host Interface</strong> that connects the EVM to blockchain state and external data,<br />
+and <strong>Precompiles</strong>, which are highly optimized native contracts for complex operations.<br />
+The system also manages <strong>Gas Usage</strong> to meter resource consumption, maintains a persistent <strong>State &amp; Database Layer</strong> for account and storage data,<br />
+and orchestrates <strong>Frames &amp; Call Handling</strong> for nested contract executions.<br />
+An <strong>Execution Loop &amp; Handler</strong> coordinate transaction lifecycle from validation to finalization, while an <strong>Inspector &amp; Tracing</strong> abstraction enables debugging and profiling.<br />
+Finally, the <strong>Context &amp; Environment</strong> encapsulate blockchain and transaction data, providing configuration and execution context throughout the EVM lifecycle.</p>
+<p><strong>Source Repository:</strong> <a href="None">None</a></p>
 <pre class="mermaid">flowchart TD
-    A0[&quot;MCP Protocol Types&quot;]
-    A1[&quot;Client/Server Sessions&quot;]
-    A2[&quot;Communication Transports&quot;]
-    A3[&quot;FastMCP Server&quot;]
-    A4[&quot;FastMCP Resources&quot;]
-    A5[&quot;FastMCP Tools&quot;]
-    A6[&quot;FastMCP Prompts&quot;]
-    A7[&quot;FastMCP Context&quot;]
-    A8[&quot;CLI&quot;]
-    A1 -- &quot;Uses MCP Types&quot; --&gt; A0
-    A1 -- &quot;Operates Over Transport&quot; --&gt; A2
-    A2 -- &quot;Serializes/Deserializes MCP...&quot; --&gt; A0
-    A3 -- &quot;Uses Session Logic&quot; --&gt; A1
-    A3 -- &quot;Manages Resources&quot; --&gt; A4
-    A3 -- &quot;Manages Tools&quot; --&gt; A5
-    A3 -- &quot;Manages Prompts&quot; --&gt; A6
-    A8 -- &quot;Runs/Configures Server&quot; --&gt; A3
-    A5 -- &quot;Handlers Can Use Context&quot; --&gt; A7
-    A4 -- &quot;Handlers Can Use Context&quot; --&gt; A7
-    A7 -- &quot;Provides Access To Session&quot; --&gt; A1
-    A7 -- &quot;Provides Access To Server&quot; --&gt; A3
+    A0[&quot;Interpreter&quot;]
+    A1[&quot;Host Interface&quot;]
+    A2[&quot;Precompiles&quot;]
+    A3[&quot;Bytecode &amp; Opcodes&quot;]
+    A4[&quot;Gas Management&quot;]
+    A5[&quot;State &amp; Database Layers&quot;]
+    A6[&quot;Frame &amp; Call Handling&quot;]
+    A7[&quot;Handler &amp; Execution Loop&quot;]
+    A8[&quot;Inspector &amp; Tracing&quot;]
+    A9[&quot;Context &amp; Environment&quot;]
+    A7 -- &quot;Executes&quot; --&gt; A0
+    A0 -- &quot;Queries state&quot; --&gt; A1
+    A7 -- &quot;Manages gas accounting&quot; --&gt; A4
+    A1 -- &quot;Accesses blockchain state&quot; --&gt; A5
+    A0 -- &quot;Calls optimized native cont...&quot; --&gt; A2
+    A6 -- &quot;Runs interpreter for frames&quot; --&gt; A0
+    A7 -- &quot;Manages call stack&quot; --&gt; A6
+    A8 -- &quot;Hooks into execution steps&quot; --&gt; A0
+    A8 -- &quot;Integrates with handler&quot; --&gt; A7
+    A9 -- &quot;Provides blockchain context&quot; --&gt; A1
+    A7 -- &quot;Uses execution environment&quot; --&gt; A9
+    A0 -- &quot;Parses and executes bytecode&quot; --&gt; A3
+    A2 -- &quot;Accesses blockchain data&quot; --&gt; A1
+    A4 -- &quot;Provides gas cost info&quot; --&gt; A0
+    A5 -- &quot;Backs state queries&quot; --&gt; A1
+    A6 -- &quot;Uses execution context&quot; --&gt; A9
+    A3 -- &quot;Supplies instruction set&quot; --&gt; A0
 </pre>
+<h2 id="chapters"><a class="header" href="#chapters">Chapters</a></h2>
+<ol>
+<li><a href="./01_context___environment_.html">Context &amp; Environment</a></li>
+<li><a href="./02_host_interface_.html">Host Interface</a></li>
+<li><a href="./03_state___database_layers_.html">State &amp; Database Layers</a></li>
+<li><a href="./04_gas_management_.html">Gas Management</a></li>
+<li><a href="./05_bytecode___opcodes_.html">Bytecode &amp; Opcodes</a></li>
+<li><a href="./06_precompiles_.html">Precompiles</a></li>
+<li><a href="./07_interpreter_.html">Interpreter</a></li>
+<li><a href="./08_frame___call_handling_.html">Frame &amp; Call Handling</a></li>
+<li><a href="./09_handler___execution_loop_.html">Handler &amp; Execution Loop</a></li>
+<li><a href="./10_inspector___tracing_.html">Inspector &amp; Tracing</a></li>
+</ol>
+<hr />
+<p>Generated by <a href="https://github.com/The-Pocket/Tutorial-Codebase-Knowledge">AI Codebase Knowledge Builder</a></p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../LevelDB/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                                <i class="fa fa-angle-left"></i>
-                            </a>
 
-                            <a rel="next prefetch" href="../NumPy Core/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../Revm/01_context___environment_.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -207,11 +221,8 @@ The SDK includes <strong>command-line tools</strong> (Abstraction 8) for running
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../LevelDB/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
-                        <i class="fa fa-angle-left"></i>
-                    </a>
 
-                    <a rel="next prefetch" href="../NumPy Core/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../Revm/01_context___environment_.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

@@ -13,26 +13,16 @@ Finally, the **Context & Environment** encapsulate blockchain and transaction da
 
 ```mermaid
 flowchart TD
-    A0["Interpreter
-"]
-    A1["Host Interface
-"]
-    A2["Precompiles
-"]
-    A3["Bytecode & Opcodes
-"]
-    A4["Gas Management
-"]
-    A5["State & Database Layers
-"]
-    A6["Frame & Call Handling
-"]
-    A7["Handler & Execution Loop
-"]
-    A8["Inspector & Tracing
-"]
-    A9["Context & Environment
-"]
+    A0["Interpreter"]
+    A1["Host Interface"]
+    A2["Precompiles"]
+    A3["Bytecode & Opcodes"]
+    A4["Gas Management"]
+    A5["State & Database Layers"]
+    A6["Frame & Call Handling"]
+    A7["Handler & Execution Loop"]
+    A8["Inspector & Tracing"]
+    A9["Context & Environment"]
     A7 -- "Executes" --> A0
     A0 -- "Queries state" --> A1
     A7 -- "Manages gas accounting" --> A4
@@ -54,26 +44,16 @@ flowchart TD
 
 ## Chapters
 
-1. [Context & Environment
-](01_context___environment_.md)
-2. [Host Interface
-](02_host_interface_.md)
-3. [State & Database Layers
-](03_state___database_layers_.md)
-4. [Gas Management
-](04_gas_management_.md)
-5. [Bytecode & Opcodes
-](05_bytecode___opcodes_.md)
-6. [Precompiles
-](06_precompiles_.md)
-7. [Interpreter
-](07_interpreter_.md)
-8. [Frame & Call Handling
-](08_frame___call_handling_.md)
-9. [Handler & Execution Loop
-](09_handler___execution_loop_.md)
-10. [Inspector & Tracing
-](10_inspector___tracing_.md)
+1. [Context & Environment](./01_context___environment_.md)
+2. [Host Interface](./02_host_interface_.md)
+3. [State & Database Layers](./03_state___database_layers_.md)
+4. [Gas Management](./04_gas_management_.md)
+5. [Bytecode & Opcodes](./05_bytecode___opcodes_.md)
+6. [Precompiles](./06_precompiles_.md)
+7. [Interpreter](./07_interpreter_.md)
+8. [Frame & Call Handling](./08_frame___call_handling_.md)
+9. [Handler & Execution Loop](./09_handler___execution_loop_.md)
+10. [Inspector & Tracing](./10_inspector___tracing_.md)
 
 
 ---

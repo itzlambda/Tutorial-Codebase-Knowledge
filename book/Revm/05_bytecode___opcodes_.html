@@ -1,0 +1,484 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Bytecode &amp; Opcodes - Tutorial Codebase Knowledge</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Tutorial Codebase Knowledge</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chapter-5-bytecode--opcodes"><a class="header" href="#chapter-5-bytecode--opcodes">Chapter 5: Bytecode &amp; Opcodes</a></h1>
+<p>Welcome back! In the previous chapter, <a href="04_gas_management_.html">Chapter 4: Gas Management</a>, we learned how the EVM tracks and manages gas — the fuel that powers Ethereum smart contracts. Now, it's time to explore the <strong>actual code the EVM runs</strong>: the <strong>Bytecode</strong> and its building blocks, the <strong>Opcodes</strong>.</p>
+<hr />
+<h2 id="why-is-bytecode--opcodes-important"><a class="header" href="#why-is-bytecode--opcodes-important">Why is Bytecode &amp; Opcodes Important?</a></h2>
+<p>Imagine you want to bake a cake, but all you have is a recipe written in a secret code. To bake the cake, you must first understand that code: what each instruction means and how it tells you to mix, bake, and serve.</p>
+<p>In Ethereum, <strong>smart contracts are compiled into low-level instructions</strong> called <strong>bytecode</strong>, which the Ethereum Virtual Machine (EVM) executes. This bytecode is a sequence of <strong>opcodes</strong> — think of them as the cooking steps from the recipe.</p>
+<p>The <code>revm</code> project's Bytecode &amp; Opcodes abstraction manages:</p>
+<ul>
+<li>How this bytecode is represented.</li>
+<li>How EVM instructions (opcodes) are defined and classified.</li>
+<li>Different formats of bytecode Ethereum supports.</li>
+<li>Analyzing the bytecode to prepare it for execution (like verifying jump locations).</li>
+<li>Validating bytecode correctness.</li>
+</ul>
+<p>This layer is, essentially, the <strong>instruction set architecture</strong> and <strong>program loader</strong> for the EVM.</p>
+<hr />
+<h2 id="use-case-running-a-simple-smart-contract-bytecode"><a class="header" href="#use-case-running-a-simple-smart-contract-bytecode">Use Case: Running a Simple Smart Contract Bytecode</a></h2>
+<p>Suppose you have a simple smart contract compiled into bytecode, for example:</p>
+<pre><code class="language-text">0x60 0x01  // PUSH1 0x01  (push the number 1 to the stack)
+0x60 0x02  // PUSH1 0x02  (push the number 2 to the stack)
+0x01       // ADD         (add the two numbers on the stack)
+0x00       // STOP        (halt execution)
+</code></pre>
+<p>To prepare the EVM interpreter to run this, we need to:</p>
+<ol>
+<li>Represent this bytecode in a form <code>revm</code> understands.</li>
+<li>Know what each opcode means (PUSH1, ADD, STOP).</li>
+<li>Analyze it so jumps and other features work correctly.</li>
+<li>Validate it to ensure it’s safe to run.</li>
+</ol>
+<p>This chapter will show you how to do all that!</p>
+<hr />
+<h2 id="breaking-down-the-concepts-bytecode--opcodes"><a class="header" href="#breaking-down-the-concepts-bytecode--opcodes">Breaking Down the Concepts: Bytecode &amp; Opcodes</a></h2>
+<p>Let's explain the key ideas behind this abstraction.</p>
+<h3 id="1-bytecode"><a class="header" href="#1-bytecode">1. Bytecode</a></h3>
+<p>A <strong>bytecode</strong> is a sequence of bytes that the EVM executes. Each byte corresponds to an <strong>opcode</strong>—an instruction for the EVM, optionally followed by immediate data bytes. For example, the <code>PUSH1</code> opcode is followed by 1 byte that says what to push onto the stack.</p>
+<p>Ethereum supports different <strong>bytecode formats</strong>:</p>
+<ul>
+<li>
+<p><strong>Legacy Bytecode</strong>: The original simple sequence of opcodes and immediate data.</p>
+</li>
+<li>
+<p><strong>EOF (Ethereum Object Format)</strong>: A newer, modular bytecode format introduced for better tooling and efficiency.</p>
+</li>
+<li>
+<p><strong>EIP-7702 Delegated Bytecode</strong>: A format for delegating code execution to other addresses.</p>
+</li>
+</ul>
+<p><code>revm</code> supports all these formats as variants of a <code>Bytecode</code> type.</p>
+<h3 id="2-opcodes"><a class="header" href="#2-opcodes">2. Opcodes</a></h3>
+<p><strong>Opcodes</strong> (operation codes) are the actual EVM instructions, like <code>ADD</code> for addition, <code>PUSH1</code> for pushing a byte, <code>JUMP</code> for jumping to a location, and many more.</p>
+<p>Each opcode has:</p>
+<ul>
+<li>An <strong>opcode byte value</strong> (e.g., <code>0x01</code> for <code>ADD</code>, <code>0x60</code> for <code>PUSH1</code>).</li>
+<li><strong>Stack input and output counts</strong> (how many items it takes and puts on the stack).</li>
+<li>An optional <strong>immediate data size</strong> (for <code>PUSH</code> instructions).</li>
+<li>Flags like whether it <strong>terminates execution</strong> (<code>STOP</code>, <code>RETURN</code>) or is a <strong>jump destination</strong>.</li>
+</ul>
+<p>Opcodes are constants in the code and all known opcodes are listed with their properties.</p>
+<hr />
+<h2 id="how-to-represent-and-analyze-bytecode-in-revm"><a class="header" href="#how-to-represent-and-analyze-bytecode-in-revm">How to Represent and Analyze Bytecode in <code>revm</code></a></h2>
+<p>Let's walk through a simple example step-by-step.</p>
+<h3 id="step-1-define-your-bytecode-bytes"><a class="header" href="#step-1-define-your-bytecode-bytes">Step 1: Define Your Bytecode Bytes</a></h3>
+<p>Here's the simple bytecode we introduced:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use primitives::Bytes;
+
+let raw_bytecode: Bytes = Bytes::from_static(&amp;[
+    0x60, 0x01, // PUSH1 1
+    0x60, 0x02, // PUSH1 2
+    0x01,       // ADD
+    0x00,       // STOP
+]);
+<span class="boring">}</span></code></pre></pre>
+<p><em>We create a byte slice representing our instructions.</em></p>
+<h3 id="step-2-create-bytecode-from-raw-bytes"><a class="header" href="#step-2-create-bytecode-from-raw-bytes">Step 2: Create <code>Bytecode</code> from Raw Bytes</a></h3>
+<p>Use the <code>Bytecode</code> enum to wrap this raw bytecode:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use revm::bytecode::Bytecode;
+
+// Convert raw bytes to Bytecode (legacy analyzed)
+let bytecode = Bytecode::new_legacy(raw_bytecode);
+<span class="boring">}</span></code></pre></pre>
+<p>This creates an analyzed bytecode variant by:</p>
+<ul>
+<li>Parsing the bytes.</li>
+<li>Building a <strong>jump table</strong> (a helper that marks valid jump destinations).</li>
+<li>Padding the bytecode if necessary (EVM requires the code to end properly).</li>
+</ul>
+<h3 id="step-3-inspect-the-bytecode-and-jump-table"><a class="header" href="#step-3-inspect-the-bytecode-and-jump-table">Step 3: Inspect the Bytecode and Jump Table</a></h3>
+<p>Let's look at the actual bytes and jump destinations:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>println!("Bytecode length: {}", bytecode.len());
+println!("Bytecode bytes: {:?}", bytecode.bytecode());
+
+if let Some(jump_table) = bytecode.legacy_jump_table() {
+    println!("Jump destinations:");
+    for (idx, is_jumpdest) in jump_table.iter().enumerate() {
+        if *is_jumpdest {
+            println!(" - Byte offset: {}", idx);
+        }
+    }
+} else {
+    println!("No jump table available");
+}
+<span class="boring">}</span></code></pre></pre>
+<p><em>This will print the byte offsets that are valid jump destinations, which helps ensure <code>JUMP</code> instructions go to allowed places.</em></p>
+<hr />
+<h2 id="what-happens-internally-when-creating-bytecode"><a class="header" href="#what-happens-internally-when-creating-bytecode">What Happens Internally When Creating Bytecode?</a></h2>
+<p>Let's visualize the process of taking raw bytes and analyzing for execution:</p>
+<pre class="mermaid">sequenceDiagram
+    participant User as User/Caller
+    participant Bytecode as Bytecode Layer
+    participant Analyzer as Jump Table Analyzer
+    participant EVM as EVM Interpreter
+
+    User-&gt;&gt;Bytecode: Provide raw bytecode bytes
+    Bytecode-&gt;&gt;Analyzer: Analyze bytecode (find jump destinations)
+    Analyzer--&gt;&gt;Bytecode: Return jump table and padded bytes
+    Bytecode-&gt;&gt;User: Return analyzed Bytecode structure
+    User-&gt;&gt;EVM: Use Bytecode for EVM execution
+</pre>
+<h3 id="explanation"><a class="header" href="#explanation">Explanation:</a></h3>
+<ul>
+<li><strong>User</strong> supplies the raw bytecode.</li>
+<li>The Bytecode layer analyzes it, marking jump destinations so jumps don't land in invalid spots.</li>
+<li>If needed, the bytecode is padded to ensure proper termination.</li>
+<li>The analyzed bytecode is then ready to be run by the EVM.</li>
+</ul>
+<hr />
+<h2 id="peeking-under-the-hood-bytecode-implementation"><a class="header" href="#peeking-under-the-hood-bytecode-implementation">Peeking Under the Hood: Bytecode Implementation</a></h2>
+<h3 id="the-bytecode-enum"><a class="header" href="#the-bytecode-enum">The <code>Bytecode</code> Enum</a></h3>
+<p>Located in <code>crates/bytecode/src/bytecode.rs</code>, the <code>Bytecode</code> enum represents different bytecode formats:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum Bytecode {
+    LegacyAnalyzed(LegacyAnalyzedBytecode), // Classic bytecode w/ jump table
+    Eof(Arc&lt;Eof&gt;),                          // New EOF bytecode format
+    Eip7702(Eip7702Bytecode),               // Delegated bytecode from EIP-7702
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="legacyanalyzedbytecode"><a class="header" href="#legacyanalyzedbytecode">LegacyAnalyzedBytecode</a></h3>
+<p>This variant contains analyzed legacy bytecode. It includes:</p>
+<ul>
+<li>The raw bytecode bytes.</li>
+<li>The <strong>jump table</strong> — a bitmap marking valid jump destinations.</li>
+</ul>
+<p>This jump table is created by scanning the code and:</p>
+<ul>
+<li>Marking all <code>JUMPDEST</code> opcodes as valid destinations.</li>
+<li>Skipping <code>PUSH</code> immediate data to avoid misinterpreting data as instructions.</li>
+</ul>
+<h3 id="jump-table-analysis"><a class="header" href="#jump-table-analysis">Jump Table Analysis</a></h3>
+<p>This is done in the file <code>crates/bytecode/src/legacy/analysis.rs</code>.</p>
+<p>A simplified snippet:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn analyze_legacy(bytecode: Bytes) -&gt; (JumpTable, Bytes) {
+    let mut jumps = BitVec::new(bytecode.len()); // All false initially
+
+    let mut i = 0;
+    while i &lt; bytecode.len() {
+        let op = bytecode[i];
+        if op == opcode::JUMPDEST {
+            jumps.set(i, true); // Mark jumpdest valid
+            i += 1;
+        } else if op &gt;= opcode::PUSH1 &amp;&amp; op &lt;= opcode::PUSH32 {
+            let push_len = (op - opcode::PUSH1 + 1) as usize;
+            i += 1 + push_len;  // Skip immediate bytes
+        } else {
+            i += 1;             // Move to next opcode
+        }
+    }
+
+    // Possibly pad if last opcode isn't STOP
+    // ...
+
+    (JumpTable(Arc::new(jumps)), bytecode)
+}
+<span class="boring">}</span></code></pre></pre>
+<p><em>It scans every byte, marks jump destinations, and correctly skips push data.</em></p>
+<hr />
+<h2 id="understanding-opcodes-in-revm"><a class="header" href="#understanding-opcodes-in-revm">Understanding Opcodes in <code>revm</code></a></h2>
+<h3 id="what-is-an-opcode"><a class="header" href="#what-is-an-opcode">What is an Opcode?</a></h3>
+<p>An <code>Opcode</code> is a wrapper around a <code>u8</code> that represents a single EVM instruction byte.</p>
+<p>You can create an opcode like this:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use revm::bytecode::opcode::OpCode;
+
+let add_opcode = OpCode::new(0x01).unwrap(); // ADD opcode
+println!("Opcode name: {}", add_opcode);
+println!("Inputs: {}", add_opcode.inputs());
+println!("Outputs: {}", add_opcode.outputs());
+println!("Is jump: {}", add_opcode.is_jump());
+<span class="boring">}</span></code></pre></pre>
+<p><strong>Output explanation:</strong></p>
+<ul>
+<li>Opcode name: <code>ADD</code></li>
+<li>Inputs: <code>2</code> (needs 2 items from the stack)</li>
+<li>Outputs: <code>1</code> (produces 1 item on the stack)</li>
+<li>Is jump: <code>false</code></li>
+</ul>
+<h3 id="opcode-properties"><a class="header" href="#opcode-properties">Opcode Properties</a></h3>
+<p>Each opcode knows:</p>
+<ul>
+<li>How many stack items it consumes (<code>inputs()</code>).</li>
+<li>How many stack items it produces (<code>outputs()</code>).</li>
+<li>If it is a jump or jump destination.</li>
+<li>How many immediate bytes it has (e.g., <code>PUSH1</code> has 1 immediate byte).</li>
+</ul>
+<hr />
+<h2 id="how-are-opcodes-organized"><a class="header" href="#how-are-opcodes-organized">How Are Opcodes Organized?</a></h2>
+<p>All opcode constants and their metadata are generated in a macro in <code>crates/bytecode/src/opcode.rs</code>. Here’s a tiny snippet for illustration:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub const ADD: u8 = 0x01;
+pub const PUSH1: u8 = 0x60;
+pub const STOP: u8 = 0x00;
+
+// Create Opcode structs for convenience
+impl OpCode {
+    pub const ADD: Self = Self(0x01);
+    pub const PUSH1: Self = Self(0x60);
+    pub const STOP: Self = Self(0x00);
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Each opcode comes with <code>OpCodeInfo</code> describing its behavior (inputs, outputs, whether it terminates).</p>
+<hr />
+<h2 id="summary-and-whats-next"><a class="header" href="#summary-and-whats-next">Summary and What's Next?</a></h2>
+<p>In this chapter, you learned:</p>
+<ul>
+<li>
+<p><strong>What is bytecode and opcode?</strong><br />
+Bytecode is the raw instruction data for the EVM, composed of opcodes which represent operations like <code>ADD</code>, <code>PUSH1</code>, and <code>STOP</code>.</p>
+</li>
+<li>
+<p><strong>Different bytecode formats:</strong><br />
+Legacy (classic), EOF (new modular), and EIP-7702 (delegated bytecode) are supported.</p>
+</li>
+<li>
+<p><strong>How bytecode is analyzed:</strong><br />
+The jump table is computed to mark valid jump destinations for safe jumps.</p>
+</li>
+<li>
+<p><strong>What information each opcode holds:</strong><br />
+Their opcode byte, stack inputs/outputs, immediate data size, and execution flags.</p>
+</li>
+<li>
+<p><strong>How to create and inspect bytecode and opcodes in <code>revm</code>.</strong></p>
+</li>
+</ul>
+<p>Now that you understand the fundamental building blocks of contracts' code, the next step is to explore <strong>Precompiles</strong> — special built-in contracts that <code>revm</code> supports for common operations. Check out <a href="06_precompiles_.html">Chapter 6: Precompiles</a> to continue!</p>
+<hr />
+<p>Thank you for following along! Bytecode and opcodes are the instruction language of Ethereum contracts, and mastering them is a big step toward understanding how smart contracts really work inside the EVM. Keep up the great progress!</p>
+<hr />
+<p>Generated by <a href="https://github.com/The-Pocket/Tutorial-Codebase-Knowledge">AI Codebase Knowledge Builder</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../Revm/04_gas_management_.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../Revm/06_precompiles_.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../Revm/04_gas_management_.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../Revm/06_precompiles_.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+    </div>
+    </body>
+</html>

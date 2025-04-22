@@ -1,0 +1,525 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Handler &amp; Execution Loop - Tutorial Codebase Knowledge</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Tutorial Codebase Knowledge</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chapter-9-handler--execution-loop"><a class="header" href="#chapter-9-handler--execution-loop">Chapter 9: Handler &amp; Execution Loop</a></h1>
+<p>Welcome back! In the previous chapter, <a href="08_frame___call_handling_.html">Frame &amp; Call Handling</a>, we learned how the EVM manages individual execution contexts called <strong>frames</strong> to run nested calls and contract creations safely. Now, we’re going to zoom out and look at the <strong>Handler &amp; Execution Loop</strong> — the high-level controller that orchestrates the full lifecycle of a transaction inside <code>revm</code>.</p>
+<hr />
+<h2 id="why-do-we-need-a-handler--execution-loop"><a class="header" href="#why-do-we-need-a-handler--execution-loop">Why Do We Need a Handler &amp; Execution Loop?</a></h2>
+<p>Imagine you're the director of a busy kitchen during dinner rush. Your job is to:</p>
+<ul>
+<li>Check if all the ingredients are ready (validation),</li>
+<li>Deduct ingredients when cooking starts (pre-processing),</li>
+<li>Tell the chefs (interpreters) exactly what to cook step-by-step (execution),</li>
+<li>Keep track of time and materials used,</li>
+<li>Handle refunds if some dishes get canceled,</li>
+<li>Reward the waiters or cleaners (post-processing),</li>
+<li>And make sure everything finishes smoothly.</li>
+</ul>
+<p>Similarly, the <strong>Handler</strong> in <code>revm</code> acts as the <strong>EVM’s transaction controller</strong>. It:</p>
+<ul>
+<li>Orchestrates <strong>validation</strong> of transactions and environment,</li>
+<li>Performs <strong>pre-execution setup</strong> like loading accounts and deducting gas upfront,</li>
+<li>Manages the <strong>execution loop</strong> by creating and running frames,</li>
+<li>Handles <strong>post-execution tasks</strong> like gas refunds, rewards, and finalizing state,</li>
+<li>Wraps all this with error handling to keep the system robust.</li>
+</ul>
+<p>Simply put, if you think of the EVM as a factory, the <strong>Handler is the factory manager</strong>, keeping everything running from start to finish for a transaction.</p>
+<hr />
+<h2 id="central-use-case-executing-a-simple-transaction"><a class="header" href="#central-use-case-executing-a-simple-transaction">Central Use Case: Executing a Simple Transaction</a></h2>
+<p>Suppose someone sends a transaction calling a smart contract to transfer tokens:</p>
+<ol>
+<li>The Handler first <strong>validates</strong> the transaction against the current blockchain state (e.g., does the sender have enough balance? Is the nonce correct?).</li>
+<li>It then <strong>loads accounts</strong> involved and deducts gas fees up front.</li>
+<li>It <strong>creates the first call frame</strong> representing this call and starts running it.</li>
+<li>If during execution, the contract calls another contract, the Handler manages those nested frames.</li>
+<li>When execution completes or fails, the Handler:
+<ul>
+<li>Calculates <strong>final gas refunds</strong>,</li>
+<li>Gives <strong>unused gas back to the sender</strong>,</li>
+<li>Transfers fees to the block beneficiary,</li>
+<li>Collects <strong>logs</strong> and final output,</li>
+<li>And <strong>cleans up</strong> internal resources.</li>
+</ul>
+</li>
+</ol>
+<p>Let's learn how the Handler achieves all this step-by-step!</p>
+<hr />
+<h2 id="breaking-down-the-handler--execution-loop"><a class="header" href="#breaking-down-the-handler--execution-loop">Breaking Down the Handler &amp; Execution Loop</a></h2>
+<p>To understand how the Handler works, let's look at the key concepts and phases in order.</p>
+<h3 id="1-validation"><a class="header" href="#1-validation">1. Validation</a></h3>
+<p>Before execution begins, the Handler checks:</p>
+<ul>
+<li>Is the transaction properly structured?</li>
+<li>Is the gas limit within the block’s gas limits?</li>
+<li>Does the caller have enough balance to cover gas and value transfers?</li>
+<li>Is the nonce correct (to prevent replay attacks)?</li>
+<li>Are things like chain ID and config compatible?</li>
+</ul>
+<p>This step prevents invalid transactions from even starting.</p>
+<h3 id="2-pre-execution"><a class="header" href="#2-pre-execution">2. Pre-Execution</a></h3>
+<p>Here the Handler:</p>
+<ul>
+<li>Loads the <strong>beneficiary</strong> account (miner/coinbase),</li>
+<li>Loads all <strong>accounts/storage</strong> in the access list to warm them for faster access,</li>
+<li>Deducts the <strong>maximum gas cost</strong> upfront from the caller's balance to avoid double spending,</li>
+<li>Applies any protocol-specific preparations (like EIP-7702 authorization lists).</li>
+</ul>
+<h3 id="3-execution-loop"><a class="header" href="#3-execution-loop">3. Execution Loop</a></h3>
+<p>This is the heart of the Handler:</p>
+<ul>
+<li>It creates the <strong>initial call frame</strong> based on the transaction input.</li>
+<li>It runs the <strong>execution loop</strong>, which:
+<ul>
+<li>Repeatedly executes frames using nested calls.</li>
+<li>Manages creation and completion of each frame.</li>
+<li>Handles results, propagates output and gas back to callers.</li>
+</ul>
+</li>
+<li>Uses a <strong>frame stack</strong> to handle nested calls safely (see <a href="08_frame___call_handling_.html">Chapter 8</a>).</li>
+</ul>
+<h3 id="4-post-execution"><a class="header" href="#4-post-execution">4. Post-Execution</a></h3>
+<p>After execution finishes (successfully or not):</p>
+<ul>
+<li>Calculates <strong>gas refunds</strong> and applies limits (EIP-7623 ensures minimal gas spent).</li>
+<li>Returns unused gas value to the caller.</li>
+<li>Sends fees to the beneficiary (miner).</li>
+<li>Finalizes logs and state changes.</li>
+<li>Clears internal buffers and prepares for next transaction.</li>
+</ul>
+<h3 id="5-error-handling"><a class="header" href="#5-error-handling">5. Error Handling</a></h3>
+<p>If anything goes wrong anywhere:</p>
+<ul>
+<li>The Handler cleans up intermediate state.</li>
+<li>Reverts journals where needed.</li>
+<li>Returns proper error info.</li>
+<li>Ensures the environment is ready for the next transaction.</li>
+</ul>
+<hr />
+<h2 id="how-to-use-the-handler-a-beginner-friendly-walkthrough"><a class="header" href="#how-to-use-the-handler-a-beginner-friendly-walkthrough">How to Use the Handler: A Beginner-Friendly Walkthrough</a></h2>
+<p>Let’s simulate what it looks like to run a transaction with a Handler.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Assume you have an EVM `evm` instance properly initialized.
+
+struct MyHandler;
+
+impl revm::handler::Handler for MyHandler {
+    type Evm = /* Your EVM type */;
+    type Error = /* Your Error type */;
+    type Frame = /* Frame type, e.g., EthFrame */;
+    type HaltReason = /* Halt reason type, e.g., HaltReason */;
+
+    // Implement required trait methods here. For beginner use,
+    // you can call the default implementations or simple wrappers.
+}
+
+let mut handler = MyHandler;
+
+// Run the transaction via the handler with 'evm'
+match handler.run(&amp;mut evm) {
+    Ok(result_and_state) =&gt; {
+        println!("Execution success! Gas used: {}", result_and_state.result.gas_used());
+        println!("Output data: {:?}", result_and_state.result.output());
+    }
+    Err(e) =&gt; {
+        println!("Execution failed with error: {:?}", e);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<blockquote>
+<p><strong>What happens here?</strong></p>
+<ul>
+<li>The Handler takes your <code>evm</code> instance (which contains Context, Interpreter, Precompiles, etc.).</li>
+<li>It automatically goes through validation, pre-execution, execution loop, and post-execution.</li>
+<li>You get a final result telling if the transaction succeeded, how much gas was used, and the contract output.</li>
+<li>If any error occurs, the Handler reports it properly.</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="internal-handler--execution-loop-what-happens-step-by-step"><a class="header" href="#internal-handler--execution-loop-what-happens-step-by-step">Internal Handler &amp; Execution Loop: What Happens Step-by-Step?</a></h2>
+<p>Let’s picture internally how the Handler processes a transaction.</p>
+<pre class="mermaid">sequenceDiagram
+    participant User as User Code
+    participant Handler as Transaction Handler
+    participant Context as Blockchain Context &amp; Journal
+    participant FrameStack as Call Frames Stack
+    participant Interpreter as EVM Bytecode Executor
+
+    User-&gt;&gt;Handler: Call `run()` with transaction and context
+    Handler-&gt;&gt;Context: Validate tx, block, and config
+    Handler-&gt;&gt;Context: Load accounts and deduct max gas from caller
+    Handler-&gt;&gt;FrameStack: Create initial call frame with tx input
+    loop Execution Loop
+        FrameStack-&gt;&gt;Interpreter: Run current frame (code execution)
+        Interpreter--&gt;&gt;FrameStack: Return frame result or new nested call
+        alt Nested call
+            FrameStack-&gt;&gt;FrameStack: Push new frame for nested call
+        else Frame complete
+            FrameStack-&gt;&gt;FrameStack: Pop frame and return result to caller
+        end
+    end
+    Handler-&gt;&gt;Context: Calculate refunds and reimburse caller
+    Handler-&gt;&gt;Context: Reward block beneficiary
+    Handler--&gt;&gt;User: Return execution results (gas used, output, logs)
+</pre>
+<h3 id="brief-explanation"><a class="header" href="#brief-explanation">Brief explanation:</a></h3>
+<ul>
+<li>The Handler serves as the conductor, coordinating each step carefully.</li>
+<li>Context keeps track of blockchain and transaction state, managing accounts, balances, and journaling.</li>
+<li>The frame stack manages each call or contract creation, allowing nesting and proper gas tracking.</li>
+<li>The Interpreter runs the actual smart contract code instructions.</li>
+<li>The loop continues until no more frames are left (execution done).</li>
+<li>After execution, fees and refunds are finalized and rewards paid out.</li>
+<li>The final status and output are returned to the user.</li>
+</ul>
+<hr />
+<h2 id="peek-under-the-hood-core-handler-code-highlights"><a class="header" href="#peek-under-the-hood-core-handler-code-highlights">Peek Under the Hood: Core Handler Code Highlights</a></h2>
+<h3 id="the-run-method-simplified"><a class="header" href="#the-run-method-simplified">The Run Method (Simplified)</a></h3>
+<p>This is the entry point to the Handler (from <code>crates/handler/src/handler.rs</code>):</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn run(
+    &amp;mut self,
+    evm: &amp;mut Self::Evm,
+) -&gt; Result&lt;ResultAndState&lt;Self::HaltReason&gt;, Self::Error&gt; {
+    // Step 1: Validate the transaction environment
+    let init_and_floor_gas = self.validate(evm)?;
+
+    // Step 2: Pre-execution setup, loading accounts and deducting gas
+    let eip7702_refund = self.pre_execution(evm)?;
+
+    // Step 3: Execute the transaction
+    let exec_result = self.execution(evm, &amp;init_and_floor_gas)?;
+
+    // Step 4: Post-execution tasks: refunds, reimbursements, rewards
+    self.post_execution(evm, exec_result, init_and_floor_gas, eip7702_refund)
+}
+<span class="boring">}</span></code></pre></pre>
+<p>Each of these steps calls further internal functions that perform tasks described earlier.</p>
+<h3 id="the-execution-loop"><a class="header" href="#the-execution-loop">The Execution Loop</a></h3>
+<p>The <code>execution</code> method runs the main loop:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn execution(
+    &amp;mut self,
+    evm: &amp;mut Self::Evm,
+    init_and_floor_gas: &amp;InitialAndFloorGas,
+) -&gt; Result&lt;FrameResult, Self::Error&gt; {
+    let gas_limit = evm.ctx().tx().gas_limit() - init_and_floor_gas.initial_gas;
+
+    // Create the first frame representing the transaction call
+    let first_frame_input = self.first_frame_input(evm, gas_limit)?;
+    let first_frame = self.first_frame_init(evm, first_frame_input)?;
+
+    // Either start with a frame or have immediate result (like out of gas)
+    let mut frame_result = match first_frame {
+        ItemOrResult::Item(frame) =&gt; self.run_exec_loop(evm, frame)?,
+        ItemOrResult::Result(result) =&gt; result,
+    };
+
+    // Process the last frame's result (manage gas, etc.)
+    self.last_frame_result(evm, &amp;mut frame_result)?;
+    Ok(frame_result)
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="the-frame-stack-loop-simplified"><a class="header" href="#the-frame-stack-loop-simplified">The Frame Stack Loop (Simplified)</a></h3>
+<p>The <code>run_exec_loop</code> method holds the frame stack loop:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn run_exec_loop(
+    &amp;mut self,
+    evm: &amp;mut Self::Evm,
+    frame: Self::Frame,
+) -&gt; Result&lt;FrameResult, Self::Error&gt; {
+    let mut frame_stack = vec![frame];
+
+    loop {
+        let current_frame = frame_stack.last_mut().unwrap();
+        let call_or_result = self.frame_call(current_frame, evm)?;
+
+        let result = match call_or_result {
+            ItemOrResult::Item(new_frame_input) =&gt; {
+                // Create new nested frame and push it on the stack
+                match self.frame_init(current_frame, evm, new_frame_input)? {
+                    ItemOrResult::Item(new_frame) =&gt; {
+                        frame_stack.push(new_frame);
+                        continue;
+                    }
+                    ItemOrResult::Result(res) =&gt; res,
+                }
+            }
+            ItemOrResult::Result(res) =&gt; {
+                // Frame finished, pop from stack and handle result
+                frame_stack.pop();
+                res
+            }
+        };
+
+        if let Some(parent_frame) = frame_stack.last_mut() {
+            // Send result back to parent frame
+            self.frame_return_result(parent_frame, evm, result)?;
+        } else {
+            // No more frames, execution complete
+            return Ok(result);
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<hr />
+<h2 id="summary"><a class="header" href="#summary">Summary</a></h2>
+<p>In this chapter, you learned:</p>
+<ul>
+<li>
+<p><strong>What is the Handler &amp; Execution Loop?</strong><br />
+The high-level controller that manages the full lifecycle of a transaction inside the EVM runtime.</p>
+</li>
+<li>
+<p><strong>Why it’s important?</strong><br />
+It ensures transactions are validated, accounts are prepared, code executes correctly with nested calls, and gas fees/refunds are managed safely.</p>
+</li>
+<li>
+<p><strong>Key phases of the handler:</strong><br />
+Validation → Pre-execution → Execution loop → Post-execution → Error handling.</p>
+</li>
+<li>
+<p><strong>How the execution loop works:</strong><br />
+Creates call frames and manages a stack to handle nested calls and contract creations.</p>
+</li>
+<li>
+<p><strong>How to use the Handler:</strong><br />
+Call <code>handler.run(&amp;mut evm)</code> to execute a transaction with everything managed automatically.</p>
+</li>
+<li>
+<p><strong>What happens internally:</strong><br />
+The handler verifies the transaction environment, preps accounts and gas, executes frames via the interpreter, processes nested calls, and finalizes results, refunds, and fees.</p>
+</li>
+</ul>
+<hr />
+<h2 id="whats-next"><a class="header" href="#whats-next">What’s Next?</a></h2>
+<p>With the Handler &amp; Execution Loop mastered, you're ready to explore how <code>revm</code> provides <strong>Inspector &amp; Tracing</strong> capabilities, letting you debug, profile, and analyze EVM execution in detail:</p>
+<p>Check out <a href="10_inspector___tracing_.html">Chapter 10: Inspector &amp; Tracing</a> to continue your learning journey!</p>
+<hr />
+<p>Thank you for following this chapter! Understanding the Handler gives you a complete picture of how revm manages transactions from start to finish, tying everything together into a robust and flexible Ethereum Virtual Machine runtime. Keep it up!</p>
+<hr />
+<p>Generated by <a href="https://github.com/The-Pocket/Tutorial-Codebase-Knowledge">AI Codebase Knowledge Builder</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../Revm/08_frame___call_handling_.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../Revm/10_inspector___tracing_.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../Revm/08_frame___call_handling_.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../Revm/10_inspector___tracing_.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+    </div>
+    </body>
+</html>

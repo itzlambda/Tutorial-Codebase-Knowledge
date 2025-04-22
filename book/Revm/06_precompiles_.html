@@ -1,0 +1,447 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Precompiles - Tutorial Codebase Knowledge</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Tutorial Codebase Knowledge</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="chapter-6-precompiles"><a class="header" href="#chapter-6-precompiles">Chapter 6: Precompiles</a></h1>
+<p>Welcome back! In the previous chapter, <a href="05_bytecode___opcodes_.html">Chapter 5: Bytecode &amp; Opcodes</a>, we learned about the raw code that the EVM executes: smart contract bytecode and the individual opcodes that make up programs. Now, let's explore a very special feature of the Ethereum Virtual Machine called <strong>Precompiles</strong>.</p>
+<hr />
+<h2 id="what-are-precompiles-and-why-do-they-matter"><a class="header" href="#what-are-precompiles-and-why-do-they-matter">What are Precompiles and Why Do They Matter?</a></h2>
+<p>Imagine you're baking a fancy cake. Some steps might be really complicated — say, decorating with delicate sugar flowers. Instead of doing it by hand each time, you get a special tool that does this tricky part super fast and perfectly.</p>
+<p>In the world of Ethereum, <strong>Precompiles are like those special tools</strong>. They are built-in, highly optimized “mini-programs” that the EVM can run by just calling certain special addresses — instead of running complex smart contract code instruction by instruction.</p>
+<p>Why is this useful?</p>
+<ul>
+<li>Some cryptographic or mathematical operations are very complex and slow if done purely in EVM bytecode.</li>
+<li>Precompiles offer <strong>native, efficient implementations</strong> of these operations.</li>
+<li>This saves gas, execution time, and memory.</li>
+</ul>
+<p>For example, operations on elliptic curves (used for cryptography), or special hash functions, are exposed through precompiles.</p>
+<hr />
+<h2 id="central-use-case-verify-a-cryptographic-signature-efficiently"><a class="header" href="#central-use-case-verify-a-cryptographic-signature-efficiently">Central Use Case: Verify a Cryptographic Signature Efficiently</a></h2>
+<p>Suppose you want your smart contract to <strong>verify a signature</strong> using the secp256k1 elliptic curve (the same one Bitcoin uses).</p>
+<ul>
+<li>You <em>could</em> write the signature verification code fully in Solidity and compile it.</li>
+<li>However, this would be very expensive and slow in gas since elliptic curve math is complex.</li>
+<li>Instead, Ethereum provides a <strong>precompile contract</strong> at a fixed address that does this efficiently.</li>
+<li>Your contract calls that address with the right input, and gets the verification result instantly.</li>
+</ul>
+<p>This is the power of precompiles — complex cryptography and other functions can be done easily and cheaply.</p>
+<hr />
+<h2 id="key-concepts-in-precompiles"><a class="header" href="#key-concepts-in-precompiles">Key Concepts in Precompiles</a></h2>
+<p>Let’s understand how precompiles work in revm.</p>
+<h3 id="1-precompile-contracts"><a class="header" href="#1-precompile-contracts">1. <strong>Precompile Contracts</strong></a></h3>
+<ul>
+<li>Special contracts at fixed addresses (like <code>0x01</code>, <code>0x06</code>, etc.).</li>
+<li>They don’t have bytecode; instead, they run native Rust code inside revm.</li>
+<li>Examples include: <code>ECRECOVER</code> (secp256k1 signature recovery), <code>BN128_ADD</code> (elliptic curve addition), <code>BLAKE2</code> hash, and others.</li>
+</ul>
+<h3 id="2-precompile-address"><a class="header" href="#2-precompile-address">2. <strong>Precompile Address</strong></a></h3>
+<ul>
+<li>Each precompile lives at a <strong>known, unique address</strong>.</li>
+<li>To call a precompile, the EVM executes a call instruction to that address.</li>
+<li>revm recognizes these addresses and runs the special native code instead of bytecode.</li>
+</ul>
+<h3 id="3-precompile-input-and-output"><a class="header" href="#3-precompile-input-and-output">3. <strong>Precompile Input and Output</strong></a></h3>
+<ul>
+<li>The input is a byte slice (<code>&amp;[u8]</code>) representing parameters.</li>
+<li>The output is a slice of bytes representing the result.</li>
+<li>The exact format of input/output depends on the precompile’s specification.</li>
+<li>revm precompiles handle input parsing, computation, gas charging, and output formatting.</li>
+</ul>
+<h3 id="4-gas-cost"><a class="header" href="#4-gas-cost">4. <strong>Gas Cost</strong></a></h3>
+<ul>
+<li>Each precompile requires some amount of gas to run.</li>
+<li>revm enforces gas limits — if insufficient gas, it returns an OutOfGas error.</li>
+<li>Gas cost can depend on input size or complexity of the operation.</li>
+</ul>
+<hr />
+<h2 id="how-to-use-precompiles-in-revm"><a class="header" href="#how-to-use-precompiles-in-revm">How to Use Precompiles in revm?</a></h2>
+<p>Here’s a very simple example of <em>calling</em> a precompile in revm. Imagine we want to run the <code>ecrecover</code> precompile (at address <code>0x01</code>) with some input.</p>
+<pre><pre class="playground"><code class="language-rust">use revm::precompile::secp256k1::ECRECOVER;
+use primitives::{Address, Bytes};
+
+fn main() {
+    // The address of the ecrecover precompile contract
+    let precompile_address: Address = revm::precompile::u64_to_address(1);
+
+    // Example input (usually message hash + signature + recovery id) as bytes
+    let input: Bytes = Bytes::from_static(&amp;[
+        // 32 bytes message hash (simplified example)
+        0; 32,
+        // 64 bytes signature (r and s components, simplified zeroes)
+        0; 64,
+        // 1 byte recovery id (27 or 28)
+        27,
+    ]);
+
+    // Example gas limit
+    let gas_limit: u64 = 10_000;
+
+    // Run the precompile function
+    match ECRECOVER.precompile()(&amp;input, gas_limit) {
+        Ok(output) =&gt; {
+            println!("Precompile succeeded!");
+            println!("Gas used: {}", output.gas_used);
+            println!("Output bytes: {:?}", output.bytes);
+        }
+        Err(e) =&gt; {
+            println!("Precompile failed with error: {}", e);
+        }
+    }
+}</code></pre></pre>
+<p><strong>Explanation:</strong></p>
+<ul>
+<li>We specify the input bytes to the function.</li>
+<li>We pick a gas limit for this call.</li>
+<li>We call the precompile function, which executes the native code.</li>
+<li>On success, we get gas used and output bytes.</li>
+<li>On failure, for example due to out-of-gas or bad input, we get an error.</li>
+</ul>
+<hr />
+<h2 id="what-happens-inside-a-precompile-call-step-by-step"><a class="header" href="#what-happens-inside-a-precompile-call-step-by-step">What Happens Inside a Precompile Call? (Step-by-Step)</a></h2>
+<pre class="mermaid">sequenceDiagram
+    participant Caller as Contract Caller
+    participant EVM as EVM Interpreter
+    participant PRE as Precompile Module
+    participant Gas as Gas Tracker
+
+    Caller-&gt;&gt;EVM: Calls precompile address with input data
+    EVM-&gt;&gt;PRE: Recognizes address as precompile, forwards input and gas limit
+    PRE-&gt;&gt;Gas: Checks gas availability for operation
+    alt Gas sufficient
+        PRE-&gt;&gt;PRE: Executes native function (e.g. elliptic curve math)
+        PRE-&gt;&gt;Gas: Charges gas used
+        PRE--&gt;&gt;EVM: Return computation output and gas used
+    else Out of gas
+        PRE--&gt;&gt;EVM: Return OutOfGas error
+    end
+    EVM--&gt;&gt;Caller: Return result bytes or error
+</pre>
+<hr />
+<h2 id="internal-implementation-details-in-revm"><a class="header" href="#internal-implementation-details-in-revm">Internal Implementation Details in revm</a></h2>
+<h3 id="where-are-precompiles-defined"><a class="header" href="#where-are-precompiles-defined">Where Are Precompiles Defined?</a></h3>
+<ul>
+<li>Located in the crate <code>crates/precompile/src</code></li>
+<li>Each precompile typically lives in its own module, like:
+<ul>
+<li><code>bn128.rs</code> (alt_bn128 elliptic curve operations)</li>
+<li><code>secp256k1.rs</code> (<code>ecrecover</code>)</li>
+<li><code>bls12_381.rs</code> (BLS signatures)</li>
+<li><code>kzg_point_evaluation.rs</code> (KZG polynomial commitments)</li>
+<li><code>modexp.rs</code> (big modular exponentiation)</li>
+<li><code>blake2.rs</code> (blake2 hash function)</li>
+<li>and more.</li>
+</ul>
+</li>
+</ul>
+<h3 id="how-are-precompiles-registered"><a class="header" href="#how-are-precompiles-registered">How Are Precompiles Registered?</a></h3>
+<ul>
+<li>The <code>Precompiles</code> struct stores a <strong>map of address → precompile function</strong>.</li>
+<li>Different Ethereum hardforks enable different sets of precompiles (e.g., Byzantium adds bn128).</li>
+<li>You can get the set of precompiles for a spec like <code>Precompiles::latest()</code>.</li>
+</ul>
+<h3 id="precompile-function-signature"><a class="header" href="#precompile-function-signature">Precompile Function Signature</a></h3>
+<p>Each precompile exposes a function:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn precompile(input: &amp;Bytes, gas_limit: u64) -&gt; Result&lt;PrecompileOutput, PrecompileError&gt;
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>Takes input data and the gas limit.</li>
+<li>Returns either a successful output (gas used + output bytes) or an error.</li>
+</ul>
+<h3 id="example-simple-ecrecover-implementation-snippet-from-secp256k1rs"><a class="header" href="#example-simple-ecrecover-implementation-snippet-from-secp256k1rs">Example: Simple <code>ecrecover</code> Implementation Snippet (from <code>secp256k1.rs</code>)</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn ec_recover_run(input: &amp;Bytes, gas_limit: u64) -&gt; PrecompileResult {
+    const BASE_GAS: u64 = 3_000;
+
+    if BASE_GAS &gt; gas_limit {
+        return Err(PrecompileError::OutOfGas);
+    }
+
+    let input = right_pad::&lt;128&gt;(input);
+
+    // Validate the 'v' parameter and parse input...
+
+    // Do the actual ecrecover logic (using a crypto library)...
+
+    Ok(PrecompileOutput::new(BASE_GAS, recovered_address_bytes))
+}
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>First, it checks if gas limit is enough.</li>
+<li>Pads input to expected length.</li>
+<li>Parses input parameters.</li>
+<li>Calls underlying cryptographic verification.</li>
+<li>Returns fixed gas used and output bytes.</li>
+</ul>
+<hr />
+<h2 id="example-the-bn128-addition-precompile"><a class="header" href="#example-the-bn128-addition-precompile">Example: The BN128 Addition Precompile</a></h2>
+<p>This precompile takes two elliptic curve points as input and outputs their sum.</p>
+<p>Minimal flow:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn run_add(input: &amp;[u8], gas_cost: u64, gas_limit: u64) -&gt; PrecompileResult {
+    if gas_cost &gt; gas_limit {
+        return Err(PrecompileError::OutOfGas);
+    }
+
+    // Pad or truncate input to expected length
+    let input = right_pad::&lt;ADD_INPUT_LEN&gt;(input);
+
+    // Deserialize two points from input bytes
+    let p1 = read_g1_point(&amp;input[..G1_LEN])?;
+    let p2 = read_g1_point(&amp;input[G1_LEN..])?;
+
+    // Compute sum of points
+    let result = g1_point_add(p1, p2);
+
+    // Encode result back to bytes
+    let output = encode_g1_point(result);
+
+    Ok(PrecompileOutput::new(gas_cost, output.into()))
+}
+<span class="boring">}</span></code></pre></pre>
+<ul>
+<li>Inputs are two fixed-length byte arrays.</li>
+<li>The function checks gas, deserializes, performs addition, and returns results.</li>
+<li>Error handling is done with proper <code>PrecompileError</code> variants.</li>
+</ul>
+<hr />
+<h2 id="summary-what-did-we-learn"><a class="header" href="#summary-what-did-we-learn">Summary: What Did We Learn?</a></h2>
+<ul>
+<li><strong>Precompiles are special built-in contracts that provide native implementations of complex operations</strong> like cryptographic functions or big integer math.</li>
+<li>They run much faster and cheaper than equivalent EVM bytecode.</li>
+<li>revm exposes them as functions callable by the EVM at fixed addresses.</li>
+<li>Precompiles handle input parsing, gas charging, computation, and output formatting.</li>
+<li>Different Ethereum upgrades add or change precompiles, which revm tracks via the <code>Precompiles</code> struct.</li>
+<li>Using precompiles is as simple as calling their address during contract execution.</li>
+</ul>
+<hr />
+<h2 id="whats-next"><a class="header" href="#whats-next">What’s Next?</a></h2>
+<p>You have now seen how revm handles special native contracts that speed up complex tasks. Next, you will learn how the <strong>Interpreter</strong> actually runs smart contract bytecode step by step, using all the tools we've covered:</p>
+<p>Check out <a href="07_interpreter_.html">Chapter 7: Interpreter</a> to dive in!</p>
+<hr />
+<p>Thank you for your attention! Precompiles might seem magical at first, but understanding their purpose and implementation gives you powerful insight into Ethereum's efficiency tricks. Keep exploring!</p>
+<hr />
+<p>Generated by <a href="https://github.com/The-Pocket/Tutorial-Codebase-Knowledge">AI Codebase Knowledge Builder</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../Revm/05_bytecode___opcodes_.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../Revm/07_interpreter_.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../Revm/05_bytecode___opcodes_.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../Revm/07_interpreter_.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+    </div>
+    </body>
+</html>
