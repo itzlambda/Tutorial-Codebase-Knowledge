@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+- Dont forget to auto commit changes to git using the `git-auto-commit` rule.
