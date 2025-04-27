@@ -13,10 +13,10 @@ def create_tutorial_flow():
     """Creates and returns the codebase tutorial generation flow."""
 
     fetch_repo = FetchRepo()
-    identify_abstractions = IdentifyAbstractions(max_retries=3, wait=10)
-    analyze_relationships = AnalyzeRelationships(max_retries=3, wait=10)
-    order_chapters = OrderChapters(max_retries=3, wait=10)
-    write_chapters = WriteChapters(max_retries=3, wait=10)
+    identify_abstractions = IdentifyAbstractions(max_retries=5, wait=20)
+    analyze_relationships = AnalyzeRelationships(max_retries=5, wait=20)
+    order_chapters = OrderChapters(max_retries=5, wait=20)
+    write_chapters = WriteChapters(max_retries=5, wait=20)
     combine_tutorial = CombineTutorial()
 
     # Connect nodes in sequence based on the design

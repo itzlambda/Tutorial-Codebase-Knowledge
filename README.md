@@ -1,7 +1,9 @@
 <h1 align="center">Turns Codebase into Easy Tutorial with AI</h1>
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-
+ <a href="https://discord.gg/hUHHE9Sa6T">
+    <img src="https://img.shields.io/discord/1346833819172601907?logo=discord&style=flat">
+</a>
 > *Ever stared at a new codebase written by others feeling completely lost? This tutorial shows you how to build an AI agent that analyzes GitHub repositories and creates beginner-friendly tutorials explaining exactly how the code works.*
 
 <p align="center">
@@ -10,11 +12,13 @@
   />
 </p>
 
-This is a tutorial project of [Pocket Flow](https://github.com/The-Pocket/PocketFlow), a 100-line LLM framework. It crawls GitHub repositories and build a knowledge base from the code. It analyzes entire codebases to identify core abstractions and how they interact, and transforms complex code into beginner-friendly tutorials with clear visualizations.
+This is a tutorial project of [Pocket Flow](https://github.com/The-Pocket/PocketFlow), a 100-line LLM framework. It crawls GitHub repositories and builds a knowledge base from the code. It analyzes entire codebases to identify core abstractions and how they interact, and transforms complex code into beginner-friendly tutorials with clear visualizations.
 
 - Check out the [YouTube Development Tutorial](https://youtu.be/AFY67zOpbSo) for more!
 
 - Check out the [Substack Post Tutorial](https://zacharyhuang.substack.com/p/ai-codebase-knowledge-builder-full) for more!
+
+&nbsp;&nbsp;**🔸 🎉 Reached Hacker News Front Page** (April 2025) with >800 up‑votes:  [Discussion »](https://news.ycombinator.com/item?id=43739456)
 
 ## ⭐ Example Results for Popular GitHub Repositories!
 
@@ -64,6 +68,7 @@ This is a tutorial project of [Pocket Flow](https://github.com/The-Pocket/Pocket
 
 - [SmolaAgents](https://the-pocket.github.io/Tutorial-Codebase-Knowledge/SmolaAgents) - Build tiny AI agents that punch way above their weight class!
 
+- Showcase Your AI-Generated Tutorials in [Discussions](https://github.com/The-Pocket/Tutorial-Codebase-Knowledge/discussions)!
 
 ## 🚀 Getting Started
 
